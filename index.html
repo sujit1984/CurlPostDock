@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>CurlPostDock</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="icon" href="./CurlPostDock.png">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="./CurlPostDock.png" alt="CurlPostDock logo">
+          <div>
+            <strong>CurlPostDock</strong>
+            <span>Offline API workbench</span>
+          </div>
+        </div>
+
+        <div class="security-strip">
+          <span class="dot"></span>
+          Local workspace. Cloud sync off.
+        </div>
+
+        <div class="sidebar-actions">
+          <button id="newCollectionBtn" class="icon-btn" title="New collection">+</button>
+          <button id="newRequestBtn" class="icon-btn" title="New request">REQ</button>
+          <button id="saveWorkspaceBtn" title="Save workspace as .cpd">Save .cpd</button>
+          <button id="saveEncryptedBtn" title="Save encrypted workspace">Encrypt</button>
+        </div>
+
+        <label class="file-button">
+          Import
+          <input id="importFileInput" type="file" accept=".cpd,.json,.har,.bru,.zip,application/json,application/zip" multiple>
+        </label>
+
+        <label class="file-button secondary">
+          Import Bruno zip
+          <input id="importBrunoInput" type="file" accept=".zip,application/zip">
+        </label>
+
+        <div class="search-box">
+          <input id="searchInput" type="search" placeholder="Search requests, tags, URLs">
+        </div>
+
+        <div class="segmented compact" role="tablist" aria-label="Collection views">
+          <button class="active" data-left-tab="collections">Collections</button>
+          <button data-left-tab="history">History</button>
+          <button data-left-tab="favorites">Favorites</button>
+        </div>
+
+        <div id="collectionTree" class="tree"></div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div class="workspace-meta">
+            <input id="workspaceName" class="workspace-title" aria-label="Workspace name">
+            <span id="workspaceStats"></span>
+          </div>
+          <div class="topbar-controls">
+            <select id="environmentSelect" title="Environment"></select>
+            <button id="runCollectionBtn">Run collection</button>
+            <button id="exportReportBtn">Export report</button>
+          </div>
+        </header>
+
+        <section class="request-dock">
+          <div class="request-title-row">
+            <input id="requestName" class="request-name" aria-label="Request name">
+            <button id="favoriteBtn" class="icon-btn" title="Toggle favorite">Star</button>
+            <button id="duplicateBtn">Duplicate</button>
+            <button id="deleteBtn" class="danger">Delete</button>
+          </div>
+
+          <div class="url-row">
+            <select id="protocolSelect" title="Protocol"></select>
+            <select id="methodSelect" title="HTTP method"></select>
+            <input id="urlInput" aria-label="Request URL" placeholder="https://api.example.com/v1/resources">
+            <button id="sendBtn" class="primary">Send</button>
+          </div>
+
+          <div class="request-tools">
+            <button id="importCurlBtn">Import cURL</button>
+            <button id="copyCurlBtn">Copy cURL</button>
+            <button id="downloadRequestBtn">Export request</button>
+            <span id="requestStatusText"></span>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Request editor">
+            <button class="active" data-tab="params">Params</button>
+            <button data-tab="auth">Auth</button>
+            <button data-tab="headers">Headers</button>
+            <button data-tab="body">Body</button>
+            <button data-tab="cookies">Cookies</button>
+            <button data-tab="variables">Variables</button>
+            <button data-tab="scripts">Scripts</button>
+          </div>
+
+          <div id="tabPanels" class="tab-panels">
+            <section data-panel="params" class="active">
+              <div class="section-title">
+                <h2>Query And Path Params</h2>
+                <button data-add-row="params">Add query param</button>
+              </div>
+              <div id="paramsTable" class="kv-table"></div>
+              <div class="section-title slim">
+                <h2>Path Params</h2>
+                <button data-add-row="pathParams">Add path param</button>
+              </div>
+              <div id="pathParamsTable" class="kv-table"></div>
+            </section>
+
+            <section data-panel="auth">
+              <div class="grid-2">
+                <label>
+                  Auth type
+                  <select id="authType"></select>
+                </label>
+                <label>
+                  Placement
+                  <select id="authPlacement">
+                    <option value="header">Header</option>
+                    <option value="query">Query param</option>
+                  </select>
+                </label>
+                <label>
+                  Username / key name / client id
+                  <input id="authUser" autocomplete="off">
+                </label>
+                <label>
+                  Password / token / secret
+                  <input id="authToken" type="password" autocomplete="off">
+                </label>
+                <label>
+                  Token URL / issuer / realm
+                  <input id="authTokenUrl" autocomplete="off">
+                </label>
+                <label>
+                  Scope / audience / service
+                  <input id="authScope" autocomplete="off">
+                </label>
+              </div>
+              <textarea id="authScript" class="code-area" spellcheck="false" placeholder="Custom auth script. Example: request.headers['X-Signature'] = cpd.hmacPlaceholder(request.url);"></textarea>
+            </section>
+
+            <section data-panel="headers">
+              <div class="section-title">
+                <h2>Headers</h2>
+                <button data-add-row="headers">Add header</button>
+              </div>
+              <div id="headersTable" class="kv-table"></div>
+            </section>
+
+            <section data-panel="body">
+              <div class="body-toolbar">
+                <label>
+                  Body type
+                  <select id="bodyType"></select>
+                </label>
+                <label class="file-inline">
+                  Binary upload
+                  <input id="binaryInput" type="file">
+                </label>
+                <button id="formatBodyBtn">Pretty print</button>
+              </div>
+              <textarea id="bodyEditor" class="code-area large" spellcheck="false"></textarea>
+            </section>
+
+            <section data-panel="cookies">
+              <div class="section-title">
+                <h2>Cookies</h2>
+                <button data-add-row="cookies">Add cookie</button>
+              </div>
+              <div id="cookiesTable" class="kv-table"></div>
+            </section>
+
+            <section data-panel="variables">
+              <div class="section-title">
+                <h2>Request Variables</h2>
+                <button data-add-row="requestVariables">Add variable</button>
+              </div>
+              <div id="requestVariablesTable" class="kv-table"></div>
+              <div class="section-title slim">
+                <h2>Active Environment Variables</h2>
+                <button data-add-row="environmentVariables">Add environment variable</button>
+              </div>
+              <div id="environmentVariablesTable" class="kv-table"></div>
+            </section>
+
+            <section data-panel="scripts">
+              <div class="split-editors">
+                <label>
+                  Pre-request script
+                  <textarea id="preScript" class="code-area" spellcheck="false"></textarea>
+                </label>
+                <label>
+                  Post-response tests
+                  <textarea id="testScript" class="code-area" spellcheck="false"></textarea>
+                </label>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="response-dock">
+          <div class="response-header">
+            <div id="responseSummary" class="response-summary">No response yet</div>
+            <div class="tabs small" role="tablist" aria-label="Response viewer">
+              <button class="active" data-response-tab="pretty">Pretty</button>
+              <button data-response-tab="raw">Raw</button>
+              <button data-response-tab="headers">Headers</button>
+              <button data-response-tab="cookies">Cookies</button>
+              <button data-response-tab="timings">Timings</button>
+              <button data-response-tab="binary">Binary</button>
+            </div>
+          </div>
+          <pre id="responseViewer" class="response-viewer"></pre>
+        </section>
+      </main>
+
+      <aside class="right-rail">
+        <div class="segmented" role="tablist" aria-label="Advanced panels">
+          <button class="active" data-module="runner">Runner</button>
+          <button data-module="snippets">Code</button>
+          <button data-module="ai">AI Assist</button>
+          <button data-module="mocks">Mocks</button>
+          <button data-module="security">Security</button>
+        </div>
+
+        <section data-module-panel="runner" class="rail-panel active">
+          <h2>Automated Runner</h2>
+          <label>Scope
+            <select id="runnerScope">
+              <option value="request">Current request</option>
+              <option value="collection">Current collection</option>
+              <option value="all">All collections</option>
+            </select>
+          </label>
+          <div class="check-grid">
+            <label><input id="parallelRun" type="checkbox"> Parallel</label>
+            <label><input id="retryFailed" type="checkbox"> Retry failed</label>
+            <label><input id="stopOnFailure" type="checkbox"> Stop on failure</label>
+          </div>
+          <label>Data file JSON
+            <textarea id="runnerData" class="mini-area" placeholder='[{"tenant":"dev"}]'></textarea>
+          </label>
+          <button id="runScopeBtn" class="primary wide">Run</button>
+          <div id="runnerResults" class="runner-results"></div>
+        </section>
+
+        <section data-module-panel="snippets" class="rail-panel">
+          <h2>Code Snippets</h2>
+          <select id="snippetLanguage">
+            <option value="curl">cURL</option>
+            <option value="javascript">JavaScript fetch</option>
+            <option value="node">Node.js</option>
+            <option value="python">Python requests</option>
+            <option value="java">Java HttpClient</option>
+            <option value="go">Go net/http</option>
+          </select>
+          <button id="copySnippetBtn">Copy snippet</button>
+          <pre id="snippetViewer" class="snippet-viewer"></pre>
+        </section>
+
+        <section data-module-panel="ai" class="rail-panel">
+          <h2>Offline AI Assisted Tests</h2>
+          <select id="aiSourceType">
+            <option value="openapi">OpenAPI / Swagger</option>
+            <option value="traffic">Traffic logs</option>
+            <option value="bug">Bug report</option>
+            <option value="failure">Production failure</option>
+          </select>
+          <textarea id="aiSource" class="mini-area tall" placeholder="Paste OpenAPI, logs, bug details, or failure payloads"></textarea>
+          <button id="generateTestsBtn" class="wide">Generate tests</button>
+          <pre id="aiOutput" class="snippet-viewer"></pre>
+        </section>
+
+        <section data-module-panel="mocks" class="rail-panel">
+          <h2>Mocks And Virtualization</h2>
+          <div class="check-grid">
+            <label><input id="mockLatency" type="checkbox"> Latency</label>
+            <label><input id="mockErrors" type="checkbox"> Errors</label>
+            <label><input id="mockRateLimit" type="checkbox"> Rate limits</label>
+            <label><input id="mockStateful" type="checkbox"> Stateful</label>
+          </div>
+          <button id="generateMockBtn" class="wide">Generate mock from collection</button>
+          <pre id="mockOutput" class="snippet-viewer"></pre>
+        </section>
+
+        <section data-module-panel="security" class="rail-panel">
+          <h2>Enterprise Security</h2>
+          <label><input id="offlineMode" type="checkbox" checked> Offline by default</label>
+          <label><input id="encryptedSync" type="checkbox"> Optional encrypted sync metadata</label>
+          <label><input id="zeroTrust" type="checkbox" checked> Zero-trust workspace rules</label>
+          <label>Bring-your-own-vault URI
+            <input id="vaultUri" placeholder="vault://team/curlpostdock">
+          </label>
+          <label>Policy as code
+            <textarea id="policyEditor" class="mini-area tall" spellcheck="false"></textarea>
+          </label>
+          <button id="validatePolicyBtn">Validate policy</button>
+          <pre id="policyResult" class="snippet-viewer"></pre>
+        </section>
+      </aside>
+    </div>
+
+    <dialog id="promptDialog">
+      <form method="dialog">
+        <h2 id="promptTitle">Input</h2>
+        <textarea id="promptText" class="code-area"></textarea>
+        <menu>
+          <button value="cancel">Cancel</button>
+          <button id="promptConfirm" value="default" class="primary">Apply</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

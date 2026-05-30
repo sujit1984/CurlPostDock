@@ -1,0 +1,104 @@
+{
+  "format": "curlpostdock.cpd",
+  "version": "0.1.0",
+  "app": "CurlPostDock",
+  "name": "Sample CurlPostDock Workspace",
+  "createdAt": "2026-05-30T00:00:00.000Z",
+  "updatedAt": "2026-05-30T00:00:00.000Z",
+  "sync": {
+    "mode": "offline",
+    "encryptedSyncEnabled": false,
+    "cloudSyncAllowed": false
+  },
+  "security": {
+    "offlineMode": true,
+    "zeroTrust": true,
+    "vaultUri": "",
+    "policy": {
+      "cloudSync": "disabled",
+      "allowNetworkImport": false,
+      "requireEncryptedSecretExport": true,
+      "blockSecretPlaintextWarning": true,
+      "approvedVaultSchemes": ["vault://"],
+      "allowedHosts": [],
+      "deniedHosts": [],
+      "forbiddenHeaders": ["x-cpd-cloud-sync"]
+    }
+  },
+  "globals": [
+    { "key": "baseUrl", "value": "https://example.com", "enabled": true, "secret": false }
+  ],
+  "variables": [],
+  "environments": [
+    {
+      "id": "env_local",
+      "name": "local",
+      "values": [
+        { "key": "host", "value": "localhost:8787", "enabled": true, "secret": false }
+      ]
+    }
+  ],
+  "activeEnvironmentId": "env_local",
+  "collections": [
+    {
+      "id": "col_sample",
+      "name": "Smoke Tests",
+      "variables": [],
+      "scripts": { "preRequest": "", "postResponse": "" },
+      "requests": [
+        {
+          "id": "req_health",
+          "name": "Health check",
+          "protocol": "REST",
+          "method": "GET",
+          "url": "{{baseUrl}}/api/status",
+          "folderPath": ["health"],
+          "tags": ["smoke"],
+          "favorite": true,
+          "auth": {
+            "type": "none",
+            "placement": "header",
+            "username": "",
+            "token": "",
+            "tokenUrl": "",
+            "scope": "",
+            "script": ""
+          },
+          "params": [],
+          "pathParams": [],
+          "headers": [
+            { "key": "Accept", "value": "application/json", "enabled": true, "secret": false }
+          ],
+          "cookies": [],
+          "variables": [],
+          "bodyType": "none",
+          "body": "",
+          "scripts": {
+            "preRequest": "",
+            "postResponse": "cpd.test('status is successful', () => {\n  cpd.expect(response.status).to.be.below(400);\n});"
+          },
+          "examples": [],
+          "mocks": []
+        }
+      ]
+    }
+  ],
+  "sharedScriptLibraries": [],
+  "history": [],
+  "mocks": [
+    {
+      "id": "mock_health",
+      "name": "Health check mock",
+      "method": "GET",
+      "path": "/api/status",
+      "status": 200,
+      "latencyMs": 0,
+      "errorRate": 0,
+      "rateLimitPerMinute": null,
+      "stateful": false,
+      "headers": { "content-type": "application/json" },
+      "body": "{ \"ok\": true, \"source\": \"CurlPostDock mock\" }"
+    }
+  ],
+  "reports": []
+}

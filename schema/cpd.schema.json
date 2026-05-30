@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://curlpostdock.local/schema/cpd.schema.json",
+  "title": "CurlPostDock Workspace",
+  "type": "object",
+  "required": ["format", "version", "app", "name", "collections"],
+  "properties": {
+    "format": { "const": "curlpostdock.cpd" },
+    "version": { "type": "string" },
+    "app": { "const": "CurlPostDock" },
+    "name": { "type": "string" },
+    "createdAt": { "type": "string" },
+    "updatedAt": { "type": "string" },
+    "sync": {
+      "type": "object",
+      "properties": {
+        "mode": { "enum": ["offline", "encrypted"] },
+        "encryptedSyncEnabled": { "type": "boolean" },
+        "cloudSyncAllowed": { "const": false }
+      },
+      "additionalProperties": true
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "offlineMode": { "type": "boolean" },
+        "zeroTrust": { "type": "boolean" },
+        "vaultUri": { "type": "string" },
+        "policy": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "globals": { "$ref": "#/$defs/variables" },
+    "variables": { "$ref": "#/$defs/variables" },
+    "environments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "values"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "values": { "$ref": "#/$defs/variables" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "activeEnvironmentId": { "type": ["string", "null"] },
+    "collections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/collection" }
+    },
+    "sharedScriptLibraries": { "type": "array" },
+    "history": { "type": "array" },
+    "mocks": { "type": "array" },
+    "reports": { "type": "array" }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "value"],
+        "properties": {
+          "key": { "type": "string" },
+          "value": { "type": "string" },
+          "enabled": { "type": "boolean" },
+          "secret": { "type": "boolean" },
+          "description": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "collection": {
+      "type": "object",
+      "required": ["id", "name", "requests"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "variables": { "$ref": "#/$defs/variables" },
+        "scripts": {
+          "type": "object",
+          "properties": {
+            "preRequest": { "type": "string" },
+            "postResponse": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "requests": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/request" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "request": {
+      "type": "object",
+      "required": ["id", "name", "protocol", "method", "url"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "protocol": { "enum": ["REST", "GraphQL", "gRPC", "WebSocket", "SSE", "Socket.IO", "MQTT"] },
+        "method": { "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "TRACE"] },
+        "url": { "type": "string" },
+        "folderPath": { "type": "array", "items": { "type": "string" } },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "favorite": { "type": "boolean" },
+        "auth": { "type": "object", "additionalProperties": true },
+        "params": { "$ref": "#/$defs/variables" },
+        "pathParams": { "$ref": "#/$defs/variables" },
+        "headers": { "$ref": "#/$defs/variables" },
+        "cookies": { "$ref": "#/$defs/variables" },
+        "variables": { "$ref": "#/$defs/variables" },
+        "bodyType": { "enum": ["none", "json", "xml", "text", "graphql", "protobuf", "form", "multipart", "binary"] },
+        "body": { "type": "string" },
+        "scripts": {
+          "type": "object",
+          "properties": {
+            "preRequest": { "type": "string" },
+            "postResponse": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "examples": { "type": "array" },
+        "mocks": { "type": "array" }
+      },
+      "additionalProperties": true
+    }
+  }
+}
